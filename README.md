@@ -2,9 +2,8 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
-# Teslo API
-
-This repository contains the backend API for the Teslo shop, built with NestJS. It provides endpoints for product management, authentication, and file uploads.
+# NestJS Backend API
+This repository contains the backend API for the NestJS Backend API, built with NestJS. It provides endpoints for product management, authentication, and file uploads.
 
 ---
 
