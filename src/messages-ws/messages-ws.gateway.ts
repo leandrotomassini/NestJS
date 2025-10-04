@@ -1,7 +1,10 @@
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 
 import { MessagesWsService } from './messages-ws.service';
+import { NewMessageDto } from './dtos/new-message.dto';
+import { JwtPayload } from 'src/auth/interfaces';
 
 
 
@@ -11,16 +14,53 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
   @WebSocketServer() wss: Server;
 
   constructor(
-    private readonly messagesWsService: MessagesWsService
+    private readonly messagesWsService: MessagesWsService,
+    private readonly jwtService: JwtService
   ) { }
 
-  handleConnection( client: Socket ) {
-    this.messagesWsService.registerClient( client );
+  async handleConnection( client: Socket ) {
+    const token = client.handshake.headers.authentication as string;
+    let payload: JwtPayload;
+
+    try {
+      payload = this.jwtService.verify( token );
+      await this.messagesWsService.registerClient( client, payload.id );
+    } catch ( error ) {
+      client.disconnect();
+      return;
+    }
+
+    // console.log( payload );
+
+
     this.wss.emit( 'clients-updated', this.messagesWsService.getConnectedClients() );
   }
 
   handleDisconnect( client: Socket ) {
     this.messagesWsService.removeClient( client.id );
+  }
+
+  @SubscribeMessage( 'message-from-client' )
+  onMessageFromClient( client: Socket, payload: NewMessageDto ) {
+
+    // Emite solo al cliente que emite
+    // client.emit( 'messages-from-server', {
+    //   fullName: 'Soy yo!',
+    //   message: payload.message || 'no-message'
+    // } );
+
+    // Emitir a todos menos al cliente inicial
+    // client.broadcast.emit( 'messages-from-server', {
+    //   fullName: 'Soy yo!',
+    //   message: payload.message || 'no-message'
+    // } );
+
+    // Emitir a todos 
+    this.wss.emit( 'messages-from-server', {
+      fullName: this.messagesWsService.getUserFullName( client.id ),
+      message: payload.message || 'no-message'
+    } );
+
   }
 
 }

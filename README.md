@@ -3,7 +3,19 @@
 </p>
 
 # NestJS Backend API
+
 This repository contains the backend API for the NestJS Backend API, built with NestJS. It provides endpoints for product management, authentication, file uploads, and real-time communication via WebSockets.
+
+---
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Modules](#modules)
+- [Installation](#installation)
+- [Running the Application](#running-the-application)
+- [Running Tests](#running-tests)
+- [API Seed](#api-seed)
 
 ---
 
